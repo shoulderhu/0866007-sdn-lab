@@ -1,0 +1,193 @@
+version: "3.5"
+services:
+  h1:
+    image: host:latest
+    container_name: h1
+    hostname: h1
+    build:
+      context: .
+      dockerfile: Dockerfile-host
+    command: bash ./command-host.sh 172.18.0.2
+    privileged: true
+    cap_add:
+      - NET_ADMIN
+      - NET_BROADCAST
+    stdin_open: true
+    tty: true
+    networks:
+      Q1h1br:
+        ipv4_address: 172.18.0.3
+  h2:
+    image: host:latest
+    container_name: h2
+    hostname: h2
+    command: bash ./command-host.sh 172.19.0.2
+    privileged: true
+    cap_add:
+      - NET_ADMIN
+      - NET_BROADCAST
+    stdin_open: true
+    tty: true
+    networks:
+      Q2h2br:
+        ipv4_address: 172.19.0.3
+  h3:
+    image: host:latest
+    container_name: h3
+    hostname: h3
+    command: bash ./command-host.sh 172.20.0.2
+    privileged: true
+    cap_add:
+      - NET_ADMIN
+      - NET_BROADCAST
+    stdin_open: true
+    tty: true
+    networks:
+      Q3h3br:
+        ipv4_address: 172.20.0.3
+  h4:
+    image: host:latest
+    container_name: h4
+    hostname: h4
+    command: bash ./command-host.sh 172.21.0.2
+    privileged: true
+    cap_add:
+      - NET_ADMIN
+      - NET_BROADCAST
+    stdin_open: true
+    tty: true
+    networks:
+      Q4h4br:
+        ipv4_address: 172.21.0.3
+  Q1:
+    image: quagga:latest
+    container_name: Q1
+    hostname: Q1
+    build:
+      context: .
+      dockerfile: Dockerfile-quagga
+    command: bash ./command-quagga.sh R1 65000 65001 65003 172.22.0.3 172.25.0.2 172.18.0.0/16
+    privileged: true
+    cap_add:
+      - NET_ADMIN
+      - NET_BROADCAST
+    stdin_open: true
+    tty: true
+    networks:
+      Q1h1br:
+        ipv4_address: 172.18.0.2
+      Q1Q2br:
+        ipv4_address: 172.22.0.2
+      Q4Q1br:
+        ipv4_address: 172.25.0.3
+  Q2:
+    image: quagga:latest
+    container_name: Q2
+    hostname: Q2
+    command: bash ./command-quagga.sh R2 65001 65000 65002 172.22.0.2 172.23.0.3 172.19.0.0/16
+    privileged: true
+    cap_add:
+      - NET_ADMIN
+      - NET_BROADCAST
+    stdin_open: true
+    tty: true
+    networks:
+      Q2h2br:
+        ipv4_address: 172.19.0.2
+      Q1Q2br:
+        ipv4_address: 172.22.0.3
+      Q2Q3br:
+        ipv4_address: 172.23.0.2
+  Q3:
+    image: quagga:latest
+    container_name: Q3
+    hostname: Q3
+    command: bash ./command-quagga.sh R3 65002 65003 65001 172.24.0.3 172.23.0.2 172.20.0.0/16
+    privileged: true
+    cap_add:
+      - NET_ADMIN
+      - NET_BROADCAST
+    stdin_open: true
+    tty: true
+    networks:
+      Q3h3br:
+        ipv4_address: 172.20.0.2
+      Q2Q3br:
+        ipv4_address: 172.23.0.3
+      Q3Q4br:
+        ipv4_address: 172.24.0.2
+  Q4:
+    image: quagga:latest
+    container_name: Q4
+    hostname: Q4
+    command: bash ./command-quagga.sh R4 65003 65002 65000 172.24.0.2 172.25.0.3 172.21.0.0/16
+    privileged: true
+    cap_add:
+      - NET_ADMIN
+      - NET_BROADCAST
+    stdin_open: true
+    tty: true
+    networks:
+      Q4h4br:
+        ipv4_address: 172.21.0.2
+      Q3Q4br:
+        ipv4_address: 172.24.0.3
+      Q4Q1br:
+        ipv4_address: 172.25.0.2
+networks:
+  Q1h1br:
+    name: Q1h1br
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.18.0.0/16
+  Q2h2br:
+    name: Q2h2br
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.19.0.0/16
+  Q3h3br:
+    name: Q3h3br
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/16
+  Q4h4br:
+    name: Q4h4br
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.21.0.0/16
+  Q1Q2br:
+    name: Q1Q2br
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.22.0.0/16
+  Q2Q3br:
+    name: Q2Q3br
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.23.0.0/16
+  Q3Q4br:
+    name: Q3Q4br
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.24.0.0/16
+  Q4Q1br:
+    name: Q4Q1br
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.25.0.0/16
