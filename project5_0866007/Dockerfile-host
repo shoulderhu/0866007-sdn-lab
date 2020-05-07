@@ -1,0 +1,7 @@
+FROM ubuntu:16.04
+MAINTAINER shoulderhu@gmail.com
+
+RUN apt update
+RUN apt -y install iproute2 net-tools
+
+COPY command-host.sh .
