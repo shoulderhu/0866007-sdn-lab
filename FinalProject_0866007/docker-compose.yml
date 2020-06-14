@@ -31,6 +31,34 @@ services:
     networks:
       R2h2br:
         ipv4_address: 172.20.0.2
+  h3:
+    image: host:latest
+    container_name: h3
+    hostname: h3
+    command: bash ./command-host.sh 172.26.0.3
+    privileged: true
+    cap_add:
+      - NET_ADMIN
+      - NET_BROADCAST
+    stdin_open: true
+    tty: true
+    networks:
+      R3h3br:
+        ipv4_address: 172.26.0.2
+  h4:
+    image: host:latest
+    container_name: h4
+    hostname: h4
+    command: bash ./command-host.sh 172.27.0.3
+    privileged: true
+    cap_add:
+      - NET_ADMIN
+      - NET_BROADCAST
+    stdin_open: true
+    tty: true
+    networks:
+      R4h4br:
+        ipv4_address: 172.27.0.2
   R1:
     image: router:latest
     container_name: R1
@@ -66,6 +94,38 @@ services:
         ipv4_address: 172.20.0.3
       R2OVS2br:
         ipv4_address: 172.22.0.2
+  R3:
+    image: router:latest
+    container_name: R3
+    hostname: R3
+    command: bash ./command-router.sh R3 65003 65000 xxxxx 172.28.0.2 172.28.0.100 xxx 172.26.0.0/16
+    privileged: true
+    cap_add:
+      - NET_ADMIN
+      - NET_BROADCAST
+    stdin_open: true
+    tty: true
+    networks:
+      R3h3br:
+        ipv4_address: 172.26.0.3
+      R3OVS3br:
+        ipv4_address: 172.28.0.2
+  R4:
+    image: router:latest
+    container_name: R4
+    hostname: R4
+    command: bash ./command-router.sh R4 65004 65000 xxxxx 172.29.0.2 172.29.0.100 xxx 172.27.0.0/16
+    privileged: true
+    cap_add:
+      - NET_ADMIN
+      - NET_BROADCAST
+    stdin_open: true
+    tty: true
+    networks:
+      R4h4br:
+        ipv4_address: 172.27.0.3
+      R4OVS4br:
+        ipv4_address: 172.29.0.2
   ONOS:
     image: onos:latest
     container_name: ONOS
@@ -88,7 +148,7 @@ services:
     image: router:latest
     container_name: Speaker
     hostname: Speaker
-    command: bash ./command-router.sh Speaker 65000 65001 65002 172.18.0.100 172.21.0.2 172.22.0.2 172.18.0.2 1
+    command: bash ./command-router.sh Speaker 65000 65001 65002 172.18.0.100 172.21.0.2 172.22.0.2 172.18.0.2 1 65003 65004 172.28.0.2 172.29.0.2
     privileged: true
     cap_add:
       - NET_ADMIN
@@ -122,6 +182,8 @@ services:
         ipv4_address: 172.23.0.2
       OVS1OVS2br:
         ipv4_address: 172.25.0.2
+      OVS1OVS4br:
+        ipv4_address: 172.31.0.2
   OVS2:
     image: ovs:latest
     container_name: OVS2
@@ -139,6 +201,46 @@ services:
         ipv4_address: 172.22.0.3
       OVS1OVS2br:
         ipv4_address: 172.25.0.3
+      OVS2OVS3br:
+        ipv4_address: 172.32.0.2
+  OVS3:
+    image: ovs:latest
+    container_name: OVS3
+    hostname: OVS3
+    privileged: true
+    cap_add:
+      - NET_ADMIN
+      - NET_BROADCAST
+    stdin_open: true
+    tty: true
+    networks:
+      builtin:
+        ipv4_address: 172.18.0.5
+      R3OVS3br:
+        ipv4_address: 172.28.0.3
+      OVS2OVS3br:
+        ipv4_address: 172.32.0.3
+      OVS3OVS4br:
+        ipv4_address: 172.30.0.2
+  OVS4:
+    image: ovs:latest
+    container_name: OVS4
+    hostname: OVS4
+    privileged: true
+    cap_add:
+      - NET_ADMIN
+      - NET_BROADCAST
+    stdin_open: true
+    tty: true
+    networks:
+      builtin:
+        ipv4_address: 172.18.0.6
+      R4OVS4br:
+        ipv4_address: 172.29.0.3
+      OVS1OVS4br:
+        ipv4_address: 172.31.0.3
+      OVS3OVS4br:
+        ipv4_address: 172.30.0.3
 networks:
   builtin:
     name: builtin
@@ -161,6 +263,20 @@ networks:
       driver: default
       config:
         - subnet: 172.20.0.0/16
+  R3h3br:
+    name: R3h3br
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.26.0.0/16
+  R4h4br:
+    name: R4h4br
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.27.0.0/16
   R1OVS1br:
     name: R1OVS1br
     driver: bridge
@@ -175,6 +291,20 @@ networks:
       driver: default
       config:
         - subnet: 172.22.0.0/16
+  R3OVS3br:
+    name: R3OVS3br
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16
+  R4OVS4br:
+    name: R4OVS4br
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.29.0.0/16
   ONOSbr:
     name: ONOSbr
     driver: bridge
@@ -189,4 +319,24 @@ networks:
       driver: default
       config:
         - subnet: 172.25.0.0/16
-
+  OVS3OVS4br:
+    name: OVS3OVS4br
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.30.0.0/16
+  OVS1OVS4br:
+    name: OVS1OVS4br
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.31.0.0/16
+  OVS2OVS3br:
+    name: OVS2OVS3br
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.32.0.0/16

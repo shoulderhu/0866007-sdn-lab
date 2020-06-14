@@ -8,11 +8,18 @@ ip1=$5
 ip2=$6
 ip3=$7
 net=$8
+asn4=${10}
+asn5=${11}
+ip4=${12}
+ip5=${13}
+
 
 if [[ -n "$9" ]]
 then
     ip addr add 172.21.0.100/16 dev eth0
     ip addr add 172.22.0.100/16 dev eth0
+    ip addr add 172.28.0.100/16 dev eth0
+    ip addr add 172.29.0.100/16 dev eth0
 fi
 
 echo "hostname ${host}zebra" >> /etc/quagga/zebra.conf
@@ -35,6 +42,16 @@ echo "  neighbor $ip2 advertisement-interval 5" >> /etc/quagga/bgpd.conf
 
 if [[ -n "$9" ]]
 then
+    echo "  !" >> /etc/quagga/bgpd.conf
+    echo "  neighbor $ip4 remote-as $asn4" >> /etc/quagga/bgpd.conf
+    echo "  neighbor $ip4 ebgp-multihop" >> /etc/quagga/bgpd.conf
+    echo "  neighbor $ip4 timers connect 5" >> /etc/quagga/bgpd.conf
+    echo "  neighbor $ip4 advertisement-interval 5" >> /etc/quagga/bgpd.conf
+    echo "  !" >> /etc/quagga/bgpd.conf
+    echo "  neighbor $ip5 remote-as $asn5" >> /etc/quagga/bgpd.conf
+    echo "  neighbor $ip5 ebgp-multihop" >> /etc/quagga/bgpd.conf
+    echo "  neighbor $ip5 timers connect 5" >> /etc/quagga/bgpd.conf
+    echo "  neighbor $ip5 advertisement-interval 5" >> /etc/quagga/bgpd.conf
     echo "  !" >> /etc/quagga/bgpd.conf
     echo "  neighbor $ip3 remote-as $asn3" >> /etc/quagga/bgpd.conf
     echo "  neighbor $ip3 ebgp-multihop" >> /etc/quagga/bgpd.conf
