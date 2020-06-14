@@ -1,0 +1,3 @@
+FROM openshift/openvswitch:latest
+
+RUN yum install -y net-tools

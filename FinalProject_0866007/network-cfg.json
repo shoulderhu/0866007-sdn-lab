@@ -1,0 +1,38 @@
+{
+    "ports": {
+        "of:00003a83c816454f/3": {
+            "interfaces": [
+                {
+                    "name": "ovs1",
+                    "ips": ["172.21.0.100/16"],
+                    "mac": "02:42:ac:17:00:03"
+                }
+            ]
+        },
+        "of:0000e225979c3042/2": {
+            "interfaces": [
+                {
+                    "name": "ovs2",
+                    "ips": ["172.22.0.100/16"],
+                    "mac": "02:42:ac:17:00:03"
+                }
+            ]
+        }
+    },
+    "apps": {
+        "org.onosproject.router": {
+            "bgp": {
+                "bgpSpeakers": [
+                    {
+                        "name": "speaker",
+                        "connectPoint": "of:00003a83c816454f/1",
+                        "peers": [
+                            "172.21.0.2",
+                            "172.22.0.2"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

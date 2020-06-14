@@ -1,0 +1,192 @@
+version: '3.5'
+services:
+  h1:
+    image: host:latest
+    container_name: h1
+    hostname: h1
+    build:
+      context: .
+      dockerfile: Dockerfile-host
+    command: bash ./command-host.sh 172.19.0.3
+    privileged: true
+    cap_add:
+      - NET_ADMIN
+      - NET_BROADCAST
+    stdin_open: true
+    tty: true
+    networks:
+      R1h1br:
+        ipv4_address: 172.19.0.2
+  h2:
+    image: host:latest
+    container_name: h2
+    hostname: h2
+    command: bash ./command-host.sh 172.20.0.3
+    privileged: true
+    cap_add:
+      - NET_ADMIN
+      - NET_BROADCAST
+    stdin_open: true
+    tty: true
+    networks:
+      R2h2br:
+        ipv4_address: 172.20.0.2
+  R1:
+    image: router:latest
+    container_name: R1
+    hostname: R1
+    build:
+      context: .
+      dockerfile: Dockerfile-router
+    command: bash ./command-router.sh R1 65001 65000 xxxxx 172.21.0.2 172.21.0.100 xxx 172.19.0.0/16
+    privileged: true
+    cap_add:
+      - NET_ADMIN
+      - NET_BROADCAST
+    stdin_open: true
+    tty: true
+    networks:
+      R1h1br:
+        ipv4_address: 172.19.0.3
+      R1OVS1br:
+        ipv4_address: 172.21.0.2
+  R2:
+    image: router:latest
+    container_name: R2
+    hostname: R2
+    command: bash ./command-router.sh R2 65002 65000 xxxxx 172.22.0.2 172.22.0.100 xxx 172.20.0.0/16
+    privileged: true
+    cap_add:
+      - NET_ADMIN
+      - NET_BROADCAST
+    stdin_open: true
+    tty: true
+    networks:
+      R2h2br:
+        ipv4_address: 172.20.0.3
+      R2OVS2br:
+        ipv4_address: 172.22.0.2
+  ONOS:
+    image: onos:latest
+    container_name: ONOS
+    hostname: ONOS
+    build:
+      context: .
+      dockerfile: Dockerfile-onos
+    privileged: true
+    cap_add:
+      - NET_ADMIN
+      - NET_BROADCAST
+    stdin_open: true
+    tty: true
+    networks:
+      builtin:
+        ipv4_address: 172.18.0.2
+      ONOSbr:
+        ipv4_address: 172.23.0.4
+  Speaker:
+    image: router:latest
+    container_name: Speaker
+    hostname: Speaker
+    command: bash ./command-router.sh Speaker 65000 65001 65002 172.18.0.100 172.21.0.2 172.22.0.2 172.18.0.2 1
+    privileged: true
+    cap_add:
+      - NET_ADMIN
+      - NET_BROADCAST
+    stdin_open: true
+    tty: true
+    networks:
+      builtin:
+        ipv4_address: 172.18.0.100
+      ONOSbr:
+        ipv4_address: 172.23.0.3
+  OVS1:
+    image: ovs:latest
+    container_name: OVS1
+    hostname: OVS1
+    build:
+      context: .
+      dockerfile: Dockerfile-ovs
+    privileged: true
+    cap_add:
+      - NET_ADMIN
+      - NET_BROADCAST
+    stdin_open: true
+    tty: true
+    networks:
+      builtin:
+        ipv4_address: 172.18.0.3
+      R1OVS1br:
+        ipv4_address: 172.21.0.3
+      ONOSbr:
+        ipv4_address: 172.23.0.2
+      OVS1OVS2br:
+        ipv4_address: 172.25.0.2
+  OVS2:
+    image: ovs:latest
+    container_name: OVS2
+    hostname: OVS2
+    privileged: true
+    cap_add:
+      - NET_ADMIN
+      - NET_BROADCAST
+    stdin_open: true
+    tty: true
+    networks:
+      builtin:
+        ipv4_address: 172.18.0.4
+      R2OVS2br:
+        ipv4_address: 172.22.0.3
+      OVS1OVS2br:
+        ipv4_address: 172.25.0.3
+networks:
+  builtin:
+    name: builtin
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.18.0.0/16
+  R1h1br:
+    name: R1h1br
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.19.0.0/16
+  R2h2br:
+    name: R2h2br
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/16
+  R1OVS1br:
+    name: R1OVS1br
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.21.0.0/16
+  R2OVS2br:
+    name: R2OVS2br
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.22.0.0/16
+  ONOSbr:
+    name: ONOSbr
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.23.0.0/16
+  OVS1OVS2br:
+    name: OVS1OVS2br
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.25.0.0/16
+

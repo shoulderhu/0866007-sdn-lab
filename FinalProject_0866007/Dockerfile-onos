@@ -1,0 +1,5 @@
+FROM onosproject/onos:2.2.0
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends net-tools && \
+    rm -rf /var/lib/apt/lists/*
